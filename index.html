@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>CRPD小英雄冒險 (翻牌挑戰版) 🌟</title>
+    <style>
+        /* --- 原有樣式維持不變 --- */
+        body { 
+            font-family: 'Arial Black', '微軟正黑體', sans-serif; 
+            background: linear-gradient(135deg, #FFD700, #87CEEB); 
+            text-align: center; 
+            margin: 0; padding: 10px; 
+            overflow: hidden;
+            animation: bgGlow 2s infinite alternate;
+        }
+        @keyframes bgGlow { 0% { opacity: 0.9; } 100% { opacity: 1; } }
+        h1 { color: #FF4500; font-size: 32px; text-shadow: 2px 2px #FFF; margin-bottom: 10px;}
+        button { 
+            font-size: 24px; padding: 15px 25px; margin: 10px; 
+            border-radius: 50px; background: linear-gradient(#4CAF50, #45a049); 
+            color: white; border: none; box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s; cursor: pointer;
+        }
+        button:active { transform: scale(0.95); }
+        
+        /* 修改卡片樣式以適應翻牌遊戲 */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            justify-content: center;
+            width: 280px;
+            margin: 10px auto;
+        }
+        .flip-card { 
+            width: 120px; height: 120px; 
+            background: #fff; 
+            border-radius: 20px; 
+            box-shadow: 0 6px 0 #bbb;
+            cursor: pointer; 
+            font-size: 60px; /* Emoji 大小 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #fff;
+            transition: transform 0.2s;
+        }
+        .flip-card.covered {
+            background: repeating-linear-gradient(
+              45deg,
+              #606dbc,
+              #606dbc 10px,
+              #465298 10px,
+              #465298 20px
+            );
+            font-size: 0; /* 蓋起來時隱藏 Emoji */
+        }
+        .flip-card.matched {
+            background: #81C784;
+            border-color: #4CAF50;
+            animation: popBounce 0.5s;
+        }
+
+        img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+        #game { font-size: 24px; margin: 10px auto; color: #333; line-height: 1.4; min-height: 320px; max-width: 600px; background: rgba(255,255,255,0.6); padding: 15px; border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);}
+        .hidden { display: none; }
+        .star { font-size: 40px; animation: sparkle 1s infinite; }
+        @keyframes sparkle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
+        .level-title { font-size:24px; font-weight:bold; margin-bottom:15px; color: #0056b3; }
+        .game-text { margin-bottom: 15px; font-weight: bold;}
+
+        /* --- 結尾 CRPD 樣式 --- */
+        .crpd-header { font-size: 22px; color: #555; margin: 15px 0 5px; }
+        .crpd-motto { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .motto-word {
+            font-size: 32px; font-weight: 900; padding: 5px 10px; border-radius: 10px;
+            text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff, 3px 3px 5px rgba(0,0,0,0.2);
+            display: inline-block; animation: popBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            opacity: 0; transform: scale(0.5);
+        }
+        .word1 { color: #FF5252; animation-delay: 0.2s; } 
+        .word2 { color: #2196F3; animation-delay: 0.5s; } 
+        .word3 { color: #4CAF50; animation-delay: 0.8s; } 
+        .separator { font-size: 30px; color: #999; line-height: 1.5; animation: fadeIn 0.5s forwards 1s; opacity: 0;}
+
+        @keyframes popBounce {
+            0% { opacity: 0; transform: scale(0.5) translateY(20px); }
+            70% { opacity: 1; transform: scale(1.2) translateY(-10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+    <h1>🎮 CRPD小英雄冒險</h1>
+    
+    <img src="cover.jpg" alt="快樂小孩" style="width:180px; height:130px; border-radius:30px; box-shadow:0 5px 15px rgba(0,0,0,0.2); object-fit: cover; background:#fff;">
+    
+    <div id="game">
+        <p class="game-text" style="font-size: 28px;">歡迎來公園玩！<br>點擊火箭，我們一起出發幫助朋友吧！</p>
+    </div>
+    <button id="startBtn" onclick="startGame()">🚀 開始冒險！</button>
+
+    <script>
+        let level = 0;
+        let audioContext;
+        const synth = window.speechSynthesis;
+
+        // 翻牌遊戲變數
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let matchCount = 0;
+
+        function speak(text) {
+            if (synth.speaking) synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW'; utterance.rate = 1; utterance.pitch = 1.1;
+            synth.speak(utterance);
+        }
+
+        function initAudio() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) audioContext = new AudioContext();
+        }
+
+        function playSuccess() { 
+            if (!audioContext) return;
+            const o = audioContext.createOscillator(); const g = audioContext.createGain();
+            o.connect(g); g.connect(audioContext.destination);
+            o.frequency.setValueAtTime(800, audioContext.currentTime);
+            o.frequency.linearRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+            g.gain.setValueAtTime(0.3, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            o.start(); o.stop(audioContext.currentTime + 0.3);
+        }
+        function playClap() { playSuccess(); setTimeout(playSuccess, 150); }
+        function playOops() { 
+            if (!audioContext) return;
+            const o = audioContext.createOscillator(); const g = audioContext.createGain();
+            o.connect(g); g.connect(audioContext.destination);
+            o.frequency.setValueAtTime(400, audioContext.currentTime);
+            o.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.2); // 失敗音效降調
+            g.gain.setValueAtTime(0.2, audioContext.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            o.start(); o.stop(audioContext.currentTime + 0.4);
+        }
+
+        // --- 遊戲邏輯 ---
+
+        function startGame() {
+            initAudio();
+            if (audioContext && audioContext.state === 'suspended') audioContext.resume();
+            
+            document.getElementById('startBtn').style.display = 'none'; // 隱藏開始按鈕
+            level = 1;
+            playSuccess();
+            speak("第一關：平等權利。請翻開卡片，找出兩對好朋友，讓大家一起玩！");
+
+            // 準備卡片數據 (2對)
+            const cardData = [
+                { id: 'pair1', icon: '🧑‍🦽' }, // 輪椅朋友
+                { id: 'pair1', icon: '🧑‍🦽' },
+                { id: 'pair2', icon: '🤝' }, // 握手/合作
+                { id: 'pair2', icon: '🤝' }
+            ];
+            // 洗牌
+            cardData.sort(() => 0.5 - Math.random());
+
+            let gridHtml = '';
+            cardData.forEach((card, index) => {
+                gridHtml += `
+                <div class="flip-card covered" data-framework="${card.id}" onclick="flipCard(this)">
+                    ${card.icon}
+                </div>`;
+            });
+
+            document.getElementById('game').innerHTML = `
+                <div class="level-title">關卡1: 平等權利 🧩</div>
+                <div class="card-grid">
+                    ${gridHtml}
+                </div>
+                <p class="game-text">點擊卡片翻開，找出一樣的！</p>
+            `;
+            
+            // 重置翻牌變數
+            hasFlippedCard = false;
+            lockBoard = false;
+            firstCard = null;
+            secondCard = null;
+            matchCount = 0;
+        }
+
+        // 第一關：翻牌邏輯
+        function flipCard(card) {
+            if (lockBoard) return;
+            if (card === firstCard) return; // 不能點同一張
+            if (card.classList.contains('matched')) return; // 已經配對的不能點
+
+            card.classList.remove('covered'); // 翻開
+            
+            if (!hasFlippedCard) {
+                // 第一次翻牌
+                hasFlippedCard = true;
+                firstCard = card;
+                return;
+            }
+
+            // 第二次翻牌
+            secondCard = card;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            playSuccess(); // 配對成功音效
+            firstCard.classList.add('matched');
+            secondCard.classList.add('matched');
+            
+            resetBoard();
+            matchCount++;
+
+            if (matchCount === 2) {
+                setTimeout(() => {
+                    startLevel2();
+                }, 1000);
+            }
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            playOops(); // 配對失敗音效
+            setTimeout(() => {
+                firstCard.classList.add('covered');
+                secondCard.classList.add('covered');
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // --- 第二關 ---
+        function startLevel2() {
+            level = 2;
+            playClap();
+            speak("太棒了！第二關：無障礙環境。哎呀！有台階，輪椅上不去！我們該怎麼辦呢？");
+            document.getElementById('game').innerHTML = `
+                <div class="level-title">關卡2: 無障礙環境 🛤️</div>
+                <div style="font-size:80px; margin:10px;">🪜🧑‍🦽</div>
+                <p class="game-text">有台階，輪椅上不去！怎麼辦？</p>
+                <div>
+                    <button onclick="pass2()">✅ 加個坡道</button>
+                    <button onclick="playOops(); speak('不對喔，再想想！CRPD精神是需要坡道的！');" style="background:#FF9800;">❌ 跳過去</button>
+                </div>
+            `;
+        }
+
+        function pass2() {
+            playClap();
+            setTimeout(() => {
+                level = 3;
+                speak("第三關：友善幫助。看到需要幫助的朋友，我們應該怎麼做呢？");
+                document.getElementById('game').innerHTML = `
+                    <div class="level-title">關卡3: 友善幫助 🤝</div>
+                    <div style="font-size:80px; margin:10px;">👀❓</div>
+                    <br><p class="game-text">看到朋友看起來需要幫忙？</p>
+                    <button onclick="win()">🌟 先問：「需要幫忙嗎？」</button>
+                `;
+            }, 800);
+        }
+
+        function win() {
+            playClap();
+            speak("太棒了！你通過了所有考驗，你就是最棒的 CRPD 小英雄！");
+
+            document.getElementById('game').innerHTML = `
+                <div class="star" style="margin-bottom:-10px;">⭐⭐⭐</div>
+                <h2 style="color:#2E8B57; margin: 10px 0;">🎉 任務完成！</h2>
+                <div style="font-size:80px;">🏆</div>
+                
+                <h3 class="crpd-header">✨ CRPD 小英雄精神 ✨</h3>
+                <div class="crpd-motto">
+                    <span class="motto-word word1">平等</span>
+                    <span class="separator">·</span>
+                    <span class="motto-word word2">無障礙</span>
+                    <span class="separator">·</span>
+                    <span class="motto-word word3">互相幫助</span>
+                </div>
+
+                <button onclick="startGame()" style="margin-top: 5px; font-size: 22px;">🔄 再玩一次</button>
+            `;
+            document.getElementById('startBtn').style.display = 'inline-block'; // 顯示按鈕以備重玩
+            document.getElementById('startBtn').innerText = "🔄 重新開始";
+            document.getElementById('startBtn').onclick = startGame;
+        }
+    </script>
+</body>
+</html>
