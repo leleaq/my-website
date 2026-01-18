@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CRPD小英雄冒險 (翻牌挑戰版) 🌟</title>
+    <title>CRPD小英雄冒險 (SVG階梯版) 🌟</title>
     <style>
         /* --- 原有樣式維持不變 --- */
         body { 
@@ -24,7 +24,7 @@
         }
         button:active { transform: scale(0.95); }
         
-        /* 修改卡片樣式以適應翻牌遊戲 */
+        /* 卡片樣式 */
         .card-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -39,7 +39,7 @@
             border-radius: 20px; 
             box-shadow: 0 6px 0 #bbb;
             cursor: pointer; 
-            font-size: 60px; /* Emoji 大小 */
+            font-size: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -47,14 +47,8 @@
             transition: transform 0.2s;
         }
         .flip-card.covered {
-            background: repeating-linear-gradient(
-              45deg,
-              #606dbc,
-              #606dbc 10px,
-              #465298 10px,
-              #465298 20px
-            );
-            font-size: 0; /* 蓋起來時隱藏 Emoji */
+            background: repeating-linear-gradient(45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px);
+            font-size: 0;
         }
         .flip-card.matched {
             background: #81C784;
@@ -62,15 +56,13 @@
             animation: popBounce 0.5s;
         }
 
-        img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
         #game { font-size: 24px; margin: 10px auto; color: #333; line-height: 1.4; min-height: 320px; max-width: 600px; background: rgba(255,255,255,0.6); padding: 15px; border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);}
-        .hidden { display: none; }
         .star { font-size: 40px; animation: sparkle 1s infinite; }
         @keyframes sparkle { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.5); } }
         .level-title { font-size:24px; font-weight:bold; margin-bottom:15px; color: #0056b3; }
         .game-text { margin-bottom: 15px; font-weight: bold;}
 
-        /* --- 結尾 CRPD 樣式 --- */
+        /* --- CRPD 結尾樣式 --- */
         .crpd-header { font-size: 22px; color: #555; margin: 15px 0 5px; }
         .crpd-motto { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .motto-word {
@@ -90,13 +82,12 @@
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
         @keyframes fadeIn { to { opacity: 1; } }
-
     </style>
 </head>
 <body>
     <h1>🎮 CRPD小英雄冒險</h1>
     
-    <img src="cover.jpg" alt="快樂小孩" style="width:180px; height:130px; border-radius:30px; box-shadow:0 5px 15px rgba(0,0,0,0.2); object-fit: cover; background:#fff;">
+    <div style="width:180px; height:130px; border-radius:30px; box-shadow:0 5px 15px rgba(0,0,0,0.2); background:#fff; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:60px;">🏞️</div>
     
     <div id="game">
         <p class="game-text" style="font-size: 28px;">歡迎來公園玩！<br>點擊火箭，我們一起出發幫助朋友吧！</p>
@@ -107,8 +98,8 @@
         let level = 0;
         let audioContext;
         const synth = window.speechSynthesis;
-
-        // 翻牌遊戲變數
+        
+        // 翻牌變數
         let hasFlippedCard = false;
         let lockBoard = false;
         let firstCard, secondCard;
@@ -142,7 +133,7 @@
             const o = audioContext.createOscillator(); const g = audioContext.createGain();
             o.connect(g); g.connect(audioContext.destination);
             o.frequency.setValueAtTime(400, audioContext.currentTime);
-            o.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.2); // 失敗音效降調
+            o.frequency.linearRampToValueAtTime(200, audioContext.currentTime + 0.2);
             g.gain.setValueAtTime(0.2, audioContext.currentTime);
             g.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
             o.start(); o.stop(audioContext.currentTime + 0.4);
@@ -154,23 +145,21 @@
             initAudio();
             if (audioContext && audioContext.state === 'suspended') audioContext.resume();
             
-            document.getElementById('startBtn').style.display = 'none'; // 隱藏開始按鈕
+            document.getElementById('startBtn').style.display = 'none';
             level = 1;
             playSuccess();
             speak("第一關：平等權利。請翻開卡片，找出兩對好朋友，讓大家一起玩！");
 
-            // 準備卡片數據 (2對)
             const cardData = [
-                { id: 'pair1', icon: '🧑‍🦽' }, // 輪椅朋友
                 { id: 'pair1', icon: '🧑‍🦽' },
-                { id: 'pair2', icon: '🤝' }, // 握手/合作
+                { id: 'pair1', icon: '🧑‍🦽' },
+                { id: 'pair2', icon: '🤝' },
                 { id: 'pair2', icon: '🤝' }
             ];
-            // 洗牌
             cardData.sort(() => 0.5 - Math.random());
 
             let gridHtml = '';
-            cardData.forEach((card, index) => {
+            cardData.forEach((card) => {
                 gridHtml += `
                 <div class="flip-card covered" data-framework="${card.id}" onclick="flipCard(this)">
                     ${card.icon}
@@ -185,65 +174,43 @@
                 <p class="game-text">點擊卡片翻開，找出一樣的！</p>
             `;
             
-            // 重置翻牌變數
-            hasFlippedCard = false;
-            lockBoard = false;
-            firstCard = null;
-            secondCard = null;
-            matchCount = 0;
+            hasFlippedCard = false; lockBoard = false; firstCard = null; secondCard = null; matchCount = 0;
         }
 
-        // 第一關：翻牌邏輯
         function flipCard(card) {
             if (lockBoard) return;
-            if (card === firstCard) return; // 不能點同一張
-            if (card.classList.contains('matched')) return; // 已經配對的不能點
+            if (card === firstCard) return;
+            if (card.classList.contains('matched')) return;
 
-            card.classList.remove('covered'); // 翻開
+            card.classList.remove('covered');
             
             if (!hasFlippedCard) {
-                // 第一次翻牌
-                hasFlippedCard = true;
-                firstCard = card;
-                return;
+                hasFlippedCard = true; firstCard = card; return;
             }
-
-            // 第二次翻牌
             secondCard = card;
             checkForMatch();
         }
 
         function checkForMatch() {
             let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
-
-            if (isMatch) {
-                disableCards();
-            } else {
-                unflipCards();
-            }
+            isMatch ? disableCards() : unflipCards();
         }
 
         function disableCards() {
-            playSuccess(); // 配對成功音效
-            firstCard.classList.add('matched');
-            secondCard.classList.add('matched');
-            
+            playSuccess();
+            firstCard.classList.add('matched'); secondCard.classList.add('matched');
             resetBoard();
             matchCount++;
-
             if (matchCount === 2) {
-                setTimeout(() => {
-                    startLevel2();
-                }, 1000);
+                setTimeout(startLevel2, 1000);
             }
         }
 
         function unflipCards() {
             lockBoard = true;
-            playOops(); // 配對失敗音效
+            playOops();
             setTimeout(() => {
-                firstCard.classList.add('covered');
-                secondCard.classList.add('covered');
+                firstCard.classList.add('covered'); secondCard.classList.add('covered');
                 resetBoard();
             }, 1000);
         }
@@ -253,14 +220,26 @@
             [firstCard, secondCard] = [null, null];
         }
 
-        // --- 第二關 ---
+        // --- 第二關 (整合 SVG 版本) ---
         function startLevel2() {
             level = 2;
             playClap();
             speak("太棒了！第二關：無障礙環境。哎呀！有台階，輪椅上不去！我們該怎麼辦呢？");
+            
+            // ★ 修改重點：這裡放入了 SVG 繪製的階梯 ★
             document.getElementById('game').innerHTML = `
                 <div class="level-title">關卡2: 無障礙環境 🛤️</div>
-                <div style="font-size:80px; margin:10px;">🪜🧑‍🦽</div>
+                
+                <div style="display:flex; justify-content:center; align-items:flex-end; height:120px; margin:20px auto; width: fit-content;">
+                    <span style="font-size:70px; margin-right: -10px; z-index: 2;">🧑‍🦽</span>
+                    
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path d="M5 95 L30 95 L30 70 L55 70 L55 45 L80 45 L80 20 L95 20" 
+                              fill="none" stroke="#8B4513" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M0 95 L100 95" stroke="#4CAF50" stroke-width="4" />
+                    </svg>
+                </div>
+
                 <p class="game-text">有台階，輪椅上不去！怎麼辦？</p>
                 <div>
                     <button onclick="pass2()">✅ 加個坡道</button>
@@ -303,7 +282,7 @@
 
                 <button onclick="startGame()" style="margin-top: 5px; font-size: 22px;">🔄 再玩一次</button>
             `;
-            document.getElementById('startBtn').style.display = 'inline-block'; // 顯示按鈕以備重玩
+            document.getElementById('startBtn').style.display = 'inline-block';
             document.getElementById('startBtn').innerText = "🔄 重新開始";
             document.getElementById('startBtn').onclick = startGame;
         }
