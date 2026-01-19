@@ -86,9 +86,7 @@
 </head>
 <body>
     <h1>🎮 CRPD小英雄冒險</h1>
-<img src="cover.jpg" alt="快樂小孩" style="width:180px; height:130px; border-radius:30px; box-shadow:0 5px 15px rgba(0,0,0,0.2); object-fit: cover; background:#fff;">
-    
-    
+    <img src="cover.jpg" alt="快樂小孩" style="width:180px; height:130px; border-radius:30px; box-shadow:0 5px 15px rgba(0,0,0,0.2); object-fit: cover; background:#fff;">
     
     <div id="game">
         <p class="game-text" style="font-size: 28px;">歡迎來公園玩！<br>點擊火箭，我們一起出發幫助朋友吧！</p>
@@ -221,13 +219,12 @@
             [firstCard, secondCard] = [null, null];
         }
 
-        // --- 第二關 (整合 SVG 版本) ---
+        // --- 第二關 (SVG 階梯版) ---
         function startLevel2() {
             level = 2;
             playClap();
             speak("太棒了！第二關：無障礙環境。哎呀！有台階，輪椅上不去！我們該怎麼辦呢？");
             
-            // ★ 修改重點：這裡放入了 SVG 繪製的階梯 ★
             document.getElementById('game').innerHTML = `
                 <div class="level-title">關卡2: 無障礙環境 🛤️</div>
                 
@@ -249,16 +246,48 @@
             `;
         }
 
+        // --- 第三關 (更新：斑馬線場景 + 雙選項) ---
         function pass2() {
             playClap();
             setTimeout(() => {
                 level = 3;
-                speak("第三關：友善幫助。看到需要幫助的朋友，我們應該怎麼做呢？");
+                speak("第三關：友善幫助。看到朋友在過馬路時遇到困難，我們應該怎麼做呢？");
                 document.getElementById('game').innerHTML = `
                     <div class="level-title">關卡3: 友善幫助 🤝</div>
-                    <div style="font-size:80px; margin:10px;">👀❓</div>
-                    <br><p class="game-text">看到朋友看起來需要幫忙？</p>
-                    <button onclick="win()">🌟 先問：「需要幫忙嗎？」</button>
+                    
+                    <div style="display:flex; justify-content:center; position:relative; height:140px; margin:10px auto; width: 260px;">
+                        
+                        <svg width="60" height="120" style="position: absolute; right: 0; top: 0;">
+                            <rect x="28" y="50" width="6" height="70" fill="#777" />
+                            <rect x="20" y="0" width="22" height="50" rx="5" fill="#333" />
+                            
+                            <circle cx="31" cy="15" r="7" fill="#FF5252">
+                                <animate attributeName="opacity" values="1;0.4;1" dur="1s" repeatCount="indefinite" />
+                            </circle>
+                            
+                            <circle cx="31" cy="35" r="7" fill="#222" /> 
+                        </svg>
+
+                        <svg width="260" height="50" style="position: absolute; bottom: 0; left: 0;">
+                            <rect width="260" height="50" fill="#607D8B" rx="5"/>
+                            <path d="M20 5 L40 5 L35 45 L15 45 Z" fill="white" opacity="0.9" />
+                            <path d="M60 5 L80 5 L75 45 L55 45 Z" fill="white" opacity="0.9" />
+                            <path d="M100 5 L120 5 L115 45 L95 45 Z" fill="white" opacity="0.9" />
+                            <path d="M140 5 L160 5 L155 45 L135 45 Z" fill="white" opacity="0.9" />
+                        </svg>
+
+                        <div style="font-size:70px; position:absolute; bottom:15px; left:20px; z-index:2;">🧑‍🦽</div>
+                    </div>
+
+                    <p class="game-text">朋友在路口等紅燈，好像需要幫忙？</p>
+                    
+                    <div style="display:flex; flex-direction:column; align-items:center;">
+                        <button onclick="win()">🌟 先問：「需要幫忙嗎？」</button>
+                        
+                        <button onclick="playOops(); speak('哎呀！雖然是好心，但要先尊重對方意願，不能隨便動別人的輪椅喔！');" style="background:#FF9800;">
+                            ❌ 直接推他走
+                        </button>
+                    </div>
                 `;
             }, 800);
         }
