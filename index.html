@@ -219,7 +219,7 @@
             [firstCard, secondCard] = [null, null];
         }
 
-        // --- 第二關 (SVG 階梯版) ---
+        // --- 第二關 (SVG 階梯版，輪椅維持朝右) ---
         function startLevel2() {
             level = 2;
             playClap();
@@ -229,7 +229,7 @@
                 <div class="level-title">關卡2: 無障礙環境 🛤️</div>
                 
                 <div style="display:flex; justify-content:center; align-items:flex-end; height:120px; margin:20px auto; width: fit-content;">
-                    <span style="font-size:70px; margin-right: -10px; z-index: 2;">🧑‍🦽</span>
+                    <span style="font-size:70px; margin-right: -10px; z-index: 2; transform: scaleX(-1); display: inline-block;">🧑‍🦽</span>
                     
                     <svg width="100" height="100" viewBox="0 0 100 100">
                         <path d="M5 95 L30 95 L30 70 L55 70 L55 45 L80 45 L80 20 L95 20" 
@@ -246,7 +246,7 @@
             `;
         }
 
-        // --- 第三關 (更新：斑馬線場景 + 雙選項) ---
+        // --- 第三關 (斑馬線場景 + 輪椅朝左) ---
         function pass2() {
             playClap();
             setTimeout(() => {
@@ -276,7 +276,7 @@
                             <path d="M140 5 L160 5 L155 45 L135 45 Z" fill="white" opacity="0.9" />
                         </svg>
 
-                        <div style="font-size:70px; position:absolute; bottom:15px; left:20px; z-index:2;">🧑‍🦽</div>
+                        <div style="font-size:70px; position:absolute; bottom:15px; left:160px; z-index:2;">🧑‍🦽</div>
                     </div>
 
                     <p class="game-text">朋友在路口等紅燈，好像需要幫忙？</p>
